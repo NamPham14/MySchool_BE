@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         
         if(request.getFullName() != null) user.setFullName(request.getFullName());
-        if(request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
+        if(request.getEmail() != null) user.setEmail(request.getEmail());
         if(request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
         
         return userMapper.toProfileDto(userRepository.save(user));

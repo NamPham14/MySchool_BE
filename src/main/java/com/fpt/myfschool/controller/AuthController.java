@@ -172,7 +172,7 @@ public class AuthController {
     public ResponseEntity<APIResponse<Void>> registerUser(@Valid @RequestBody RegisterRequest signUpRequest) {
         if (userRepository.existsByPhoneNumber(signUpRequest.getPhoneNumber())) {
             // Ném thẳng Exception theo chuẩn mới thay vì tự return ResponseEntity
-            throw new AppException(ErrorCode.EMAIL_EXISTED); // Cần sửa sau thành PHONE_EXISTED nếu có
+            throw new AppException(ErrorCode.USER_EXISTED); // Cần sửa sau thành PHONE_EXISTED nếu có
         }
 
         if (!otpService.verifyOtp(signUpRequest.getPhoneNumber(), signUpRequest.getOtp())) {
