@@ -20,9 +20,14 @@ import com.fpt.myfschool.repository.SubjectRepository;
 import com.fpt.myfschool.repository.UserRepository;
 import com.fpt.myfschool.service.GradeService;
 import com.fpt.myfschool.service.SmartNotificationEngine;
+import com.fpt.myfschool.util.ExcelHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -188,4 +193,42 @@ public class GradeServiceImpl implements GradeService {
             return response;
         }).collect(Collectors.toList());
     }
+
+    /**
+     * Tạo ra cái "File mẫu" cho giáo viên tải về.
+     * @param classId
+     * @return
+     */
+    @Override
+    public ByteArrayInputStream exportGradeTemplate(Integer classId) {
+        List<User> students = userRepository.findBySchoolClassId(classId);
+
+        return ExcelHelper.gradesToExcel(students);
+    }
+    /**
+     *  Nhận file giáo viên úp lên và cập nhật điểm vào hệ thống.
+     * @param file
+     * @param subjectId
+     * @param semesterId
+     */
+    @Override
+    @Transactional
+    public void importGradesFromExcel(MultipartFile file, Integer subjectId, Integer semesterId) {
+        try {
+            // Gọi Helper đọc file Excel ra 1 list chứa các GradeRequest
+            List<GradeRequest> requests = ExcelHelper.excelToGrades(file.getInputStream(), subjectId, semesterId);
+
+            // Vòng lặp: Gọi lại hàm nhập điểm cũ của bạn để lưu vào Database
+            // (Vừa an toàn vì tận dụng được logic cũ, vừa kích hoạt được các trigger tính toán)
+            for (GradeRequest request : requests) {
+                inputOrUpdateGrade(request);
+            }
+
+        }catch (IOException e){
+            throw new RuntimeException("Không thể đọc file excel lưu điểm: " + e.getMessage());
+        }
+    }
+
+
+
 }
