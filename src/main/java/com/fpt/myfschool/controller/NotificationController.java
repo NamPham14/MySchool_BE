@@ -56,4 +56,15 @@ public class NotificationController {
         return ResponseEntity.ok(APIResponse.<String>builder()
                 .status(200).code(1000).message("Đã đánh dấu đã đọc").data("OK").build());
     }
+
+    /**
+     * [DÀNH CHO HỌC SINH & GIÁO VIÊN]
+     * API đánh dấu tất cả thông báo đã đọc
+     */
+    @PutMapping("/read-all")
+    public ResponseEntity<APIResponse<String>> markAllAsRead() {
+        notificationService.markAllAsRead(getCurrentUserId());
+        return ResponseEntity.ok(APIResponse.<String>builder()
+                .status(200).code(1000).message("Đã đánh dấu tất cả đã đọc").data("OK").build());
+    }
 }

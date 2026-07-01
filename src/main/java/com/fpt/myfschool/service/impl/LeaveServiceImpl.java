@@ -43,7 +43,6 @@ public class LeaveServiceImpl implements LeaveService {
                 .build();
                 
         LeaveRequest saved = leaveRepo.save(leave);
-        notificationEngine.notifyLeaveReviewed(saved);
         return leaveMapper.toDto(saved);
     }
 

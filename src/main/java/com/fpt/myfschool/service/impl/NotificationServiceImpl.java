@@ -32,6 +32,15 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public void markAllAsRead(Long userId) {
+        List<Notification> unreadNotifs = notificationRepo.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                .filter(n -> !Boolean.TRUE.equals(n.getIsRead()))
+                .collect(Collectors.toList());
+        unreadNotifs.forEach(n -> n.setIsRead(true));
+        notificationRepo.saveAll(unreadNotifs);
+    }
+
+    @Override
     public long getUnreadCount(Long userId) {
         return notificationRepo.countByUserIdAndIsReadFalse(userId);
     }

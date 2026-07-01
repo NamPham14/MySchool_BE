@@ -19,6 +19,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final com.fpt.myfschool.repository.SchoolClassRepository classRepository;
     private final com.fpt.myfschool.repository.SubjectRepository subjectRepository;
     private final com.fpt.myfschool.repository.UserRepository userRepository;
+    private final com.fpt.myfschool.service.SmartNotificationEngine notificationEngine;
 
     /**
      * Xem Bài Tập Của Lớp
@@ -65,7 +66,13 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setSubject(subject);
         assignment.setTeacher(teacher);
         
-        return assignmentMapper.toDto(assignmentRepo.save(assignment));
+        Assignment saved = assignmentRepo.save(assignment);
+        
+        // Gửi thông báo cho toàn bộ học sinh trong lớp
+        List<com.fpt.myfschool.entity.User> students = userRepository.findBySchoolClassId(schoolClass.getId());
+        notificationEngine.notifyNewAssignment(saved, students);
+        
+        return assignmentMapper.toDto(saved);
     }
 
     @Override

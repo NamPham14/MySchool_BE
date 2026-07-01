@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Random;
 import java.util.Set;
 
 @Component
@@ -80,7 +81,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             semesterRepository.save(currentSemester);
 
             log.info("Seeding Timetable...");
-            java.util.Random random = new java.util.Random();
+            Random random = new java.util.Random();
             for (int day = 2; day <= 7; day++) { // Thứ 2 đến Thứ 7
                 // Sáng: 4 tiết, mỗi tiết 1 môn (tổng cộng 4 môn)
                 timetableRepository.save(Timetable.builder().schoolClass(class10A1).subject(allSubjects.get(random.nextInt(allSubjects.size()))).teacher(teacher)
@@ -111,9 +112,9 @@ public class DatabaseSeeder implements CommandLineRunner {
             }
 
             log.info("Seeding Event Categories...");
-            com.fpt.myfschool.entity.EventCategory cat1 = eventCategoryRepository.save(com.fpt.myfschool.entity.EventCategory.builder().name("Thể thao").build());
-            com.fpt.myfschool.entity.EventCategory cat2 = eventCategoryRepository.save(com.fpt.myfschool.entity.EventCategory.builder().name("Học Thuật").build());
-            com.fpt.myfschool.entity.EventCategory cat3 = eventCategoryRepository.save(com.fpt.myfschool.entity.EventCategory.builder().name("Lễ Hội").build());
+            EventCategory cat1 = eventCategoryRepository.save(EventCategory.builder().name("Thể thao").build());
+            EventCategory cat2 = eventCategoryRepository.save(EventCategory.builder().name("Học Thuật").build());
+            EventCategory cat3 = eventCategoryRepository.save(EventCategory.builder().name("Lễ Hội").build());
 
             log.info("Seeding Events...");
             eventRepository.save(Event.builder().title("Lễ khai giảng năm học mới").category(cat3).startDatetime(LocalDateTime.now().plusDays(2).withHour(8).withMinute(0)).endDatetime(LocalDateTime.now().plusDays(2).withHour(11).withMinute(0)).location("Sân trường chính").status(Event.EventStatus.UPCOMING).build());

@@ -2,6 +2,7 @@ package com.fpt.myfschool.repository;
 
 import com.fpt.myfschool.entity.LeaveRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,8 +16,10 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
      */
     List<LeaveRequest> findByStudentIdOrderByCreatedAtDesc(Long studentId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT lr FROM LeaveRequest lr WHERE lr.student.schoolClass.id = :classId ORDER BY lr.createdAt DESC")
+    @Query("SELECT lr FROM LeaveRequest lr WHERE lr.student.schoolClass.id = :classId ORDER BY lr.createdAt DESC")
     List<LeaveRequest> findByClassIdOrderByCreatedAtDesc(@org.springframework.data.repository.query.Param("classId") Integer classId);
 
     List<LeaveRequest> findAllByOrderByCreatedAtDesc();
+    
+    long countByStatus(LeaveRequest.LeaveStatus status);
 }
