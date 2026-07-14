@@ -79,9 +79,12 @@ public class GradeController {
      * Tải file Excel mẫu danh sách lớp
      */
     @GetMapping("/class/{classId}/export-template")
-    public ResponseEntity<Resource> exportGradeTemplate(@PathVariable Integer classId) {
+    public ResponseEntity<Resource> exportGradeTemplate(
+            @PathVariable Integer classId,
+            @RequestParam(required = true) Integer subjectId,
+            @RequestParam(required = false, defaultValue = "1") Integer semesterId) {
         String filename = "grades_template_class_" + classId + ".xlsx";
-        InputStreamResource file = new InputStreamResource(gradeService.exportGradeTemplate(classId));
+        InputStreamResource file = new InputStreamResource(gradeService.exportGradeTemplate(classId, subjectId, semesterId));
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)

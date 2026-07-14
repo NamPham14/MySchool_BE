@@ -15,7 +15,7 @@ public interface GradeService {
     void calculateAndSaveAcademicSummary(Long studentId, Integer semesterId);
     List<StudentGradeResponse> getStudentGradesByClassAndSubject(Integer classId, Integer subjectId, Integer semesterId);
 
-    ByteArrayInputStream exportGradeTemplate(Integer classId);
+    ByteArrayInputStream exportGradeTemplate(Integer classId, Integer subjectId, Integer semesterId);
     void importGradesFromExcel(MultipartFile file, Integer subjectId, Integer semesterId);
 
 }

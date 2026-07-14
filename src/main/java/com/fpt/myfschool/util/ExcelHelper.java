@@ -29,7 +29,7 @@ public class ExcelHelper {
      * @param students
      * @return
      */
-    public static ByteArrayInputStream gradesToExcel(List<User> students){
+    public static ByteArrayInputStream gradesToExcel(List<com.fpt.myfschool.dto.response.StudentGradeResponse> students){
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out =  new ByteArrayOutputStream()) {
 
             Sheet sheet = workbook.createSheet(SHEET);
@@ -42,15 +42,22 @@ public class ExcelHelper {
 
             // Đổ dự liệu học sinh  vào dòng tiếp theo
             int rowInx = 1;
-            for(User student : students){
+            for(com.fpt.myfschool.dto.response.StudentGradeResponse student : students){
                 Row row = sheet.createRow(rowInx++);
 
                 // cot 0: Student Id
-                row.createCell(0).setCellValue(student.getId());
+                row.createCell(0).setCellValue(student.getStudentId());
                 // cot 1: ma sv
                 row.createCell(1).setCellValue(student.getRollNumber() != null ? student.getRollNumber() : "");
-                row.createCell(2).setCellValue(student.getFullName() != null ? student.getFullName() : "");
-
+                row.createCell(2).setCellValue(student.getStudentName() != null ? student.getStudentName() : "");
+                
+                if (student.getMidtermScore() != null) {
+                    row.createCell(3).setCellValue(student.getMidtermScore());
+                }
+                
+                if (student.getFinalScore() != null) {
+                    row.createCell(4).setCellValue(student.getFinalScore());
+                }
             }
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());

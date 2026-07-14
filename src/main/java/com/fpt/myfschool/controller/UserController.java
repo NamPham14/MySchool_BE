@@ -19,8 +19,11 @@ public class UserController {
     private final UserService userService;
     
     private Long getCurrentUserId() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userDetails.getId();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetailsImpl) {
+            return ((UserDetailsImpl) principal).getId();
+        }
+        throw new RuntimeException("Unauthorized: User not found or token expired");
     }
 
     /**

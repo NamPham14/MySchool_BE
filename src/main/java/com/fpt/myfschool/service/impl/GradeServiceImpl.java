@@ -200,10 +200,9 @@ public class GradeServiceImpl implements GradeService {
      * @return
      */
     @Override
-    public ByteArrayInputStream exportGradeTemplate(Integer classId) {
-        List<User> students = userRepository.findBySchoolClassId(classId);
-
-        return ExcelHelper.gradesToExcel(students);
+    public ByteArrayInputStream exportGradeTemplate(Integer classId, Integer subjectId, Integer semesterId) {
+        List<com.fpt.myfschool.dto.response.StudentGradeResponse> studentGrades = getStudentGradesByClassAndSubject(classId, subjectId, semesterId);
+        return ExcelHelper.gradesToExcel(studentGrades);
     }
     /**
      *  Nhận file giáo viên úp lên và cập nhật điểm vào hệ thống.
