@@ -14,4 +14,5 @@ public interface UserService {
     java.util.List<UserProfileResponse> getAllTeachers();
     void assignStudentToClass(Long studentId, Integer classId);
     UserProfileResponse createStudent(com.fpt.myfschool.dto.request.RegisterRequest request, Integer classId);
+    java.util.List<UserProfileResponse> getMyChildren(Long parentId);
 }

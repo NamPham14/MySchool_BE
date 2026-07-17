@@ -26,8 +26,9 @@ public class FeeController {
      * API xem danh sách học phí cần đóng hoặc đã đóng (của chính tôi)
      */
     @GetMapping("/my-invoices")
-    public ResponseEntity<APIResponse<List<FeeInvoiceDto>>> getMyInvoices() {
-        Long sId = getCurrentUserId();
+    public ResponseEntity<APIResponse<List<FeeInvoiceDto>>> getMyInvoices(
+            @RequestParam(required = false) Long studentId) {
+        Long sId = (studentId != null) ? studentId : getCurrentUserId();
         List<FeeInvoiceDto> data = feeService.getStudentInvoices(sId);
         return ResponseEntity.ok(APIResponse.<List<FeeInvoiceDto>>builder()
                 .status(200).code(1000).message("Thành công").data(data).build());

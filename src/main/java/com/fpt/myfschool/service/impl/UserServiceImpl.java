@@ -1,4 +1,5 @@
 package com.fpt.myfschool.service.impl;
+
 import com.fpt.myfschool.dto.request.UpdateProfileRequest;
 import com.fpt.myfschool.dto.response.UserProfileResponse;
 import com.fpt.myfschool.entity.User;
@@ -9,6 +10,7 @@ import com.fpt.myfschool.repository.UserRepository;
 import com.fpt.myfschool.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fpt.myfschool.service.CloudinaryService;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -157,5 +160,11 @@ public class UserServiceImpl implements UserService {
         user.setRoles(roles);
 
         return userMapper.toProfileDto(userRepository.save(user));
+    }
+
+    @Override
+    public java.util.List<UserProfileResponse> getMyChildren(Long parentId) {
+        User parent = userRepository.findById(parentId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return parent.getChildren().stream().map(userMapper::toProfileDto).collect(java.util.stream.Collectors.toList());
     }
 }

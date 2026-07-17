@@ -20,9 +20,10 @@ public class JwtResponse {
     private String email;
     private String rollNumber;
     private String campus;
+    private String className;
     private List<String> roles;
 
-    public JwtResponse(String token, String refreshToken, Long id, String phoneNumber, String fullName, String avatarUrl, String email, String rollNumber, String campus, List<String> roles) {
+    public JwtResponse(String token, String refreshToken, Long id, String phoneNumber, String fullName, String avatarUrl, String email, String rollNumber, String campus, String className, List<String> roles) {
         this.token = token;
         this.refreshToken = refreshToken;
         this.type = "Bearer";
@@ -33,6 +34,7 @@ public class JwtResponse {
         this.email = email;
         this.rollNumber = rollNumber;
         this.campus = campus;
+        this.className = className;
         this.roles = roles;
     }
 }

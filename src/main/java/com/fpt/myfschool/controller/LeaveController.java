@@ -27,8 +27,9 @@ public class LeaveController {
      * API trên màn hình Học sinh thao tác để nộp đơn xin nghỉ phép
      */
     @PostMapping("/submit")
-    public ResponseEntity<APIResponse<LeaveResDto>> submitLeave(@RequestBody LeaveReqDto request) {
-        request.setStudentId(getCurrentUserId());
+    public ResponseEntity<APIResponse<LeaveResDto>> submitLeave(@RequestBody LeaveReqDto request, @RequestParam(required = false) Long studentId) {
+        Long sId = (studentId != null) ? studentId : getCurrentUserId();
+        request.setStudentId(sId);
         LeaveResDto data = leaveService.submitLeaveRequest(request);
         return ResponseEntity.ok(APIResponse.<LeaveResDto>builder()
                 .status(200).code(1000).message("Nộp đơn thành công").data(data).build());
@@ -39,8 +40,9 @@ public class LeaveController {
      * API trên màn hình Học sinh thao tác để xem lịch sử nghỉ phép của mình
      */
     @GetMapping("/my-requests")
-    public ResponseEntity<APIResponse<List<LeaveResDto>>> getMyHistory() {
-        List<LeaveResDto> data = leaveService.getStudentLeaveHistory(getCurrentUserId());
+    public ResponseEntity<APIResponse<List<LeaveResDto>>> getMyHistory(@RequestParam(required = false) Long studentId) {
+        Long sId = (studentId != null) ? studentId : getCurrentUserId();
+        List<LeaveResDto> data = leaveService.getStudentLeaveHistory(sId);
         return ResponseEntity.ok(APIResponse.<List<LeaveResDto>>builder()
                 .status(200).code(1000).message("Thành công").data(data).build());
     }

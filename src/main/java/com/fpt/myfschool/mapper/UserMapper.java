@@ -5,5 +5,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+    @org.mapstruct.Mapping(source = "schoolClass.name", target = "className")
     UserProfileResponse toProfileDto(User user);
 }

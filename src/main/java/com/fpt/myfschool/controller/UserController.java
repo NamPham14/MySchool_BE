@@ -38,6 +38,17 @@ public class UserController {
     }
 
     /**
+     * [DÀNH CHO PHỤ HUYNH]
+     * API lấy danh sách con cái
+     */
+    @GetMapping("/parents/my-children")
+    public ResponseEntity<APIResponse<java.util.List<UserProfileResponse>>> getMyChildren() {
+        java.util.List<UserProfileResponse> data = userService.getMyChildren(getCurrentUserId());
+        return ResponseEntity.ok(APIResponse.<java.util.List<UserProfileResponse>>builder()
+                .status(200).code(1000).message("Lấy danh sách con thành công").data(data).build());
+    }
+
+    /**
      * [DÀNH CHO HỌC SINH & GIÁO VIÊN]
      * API cho phép người dùng tự đổi Avatar, SĐT, Tên hiển thị
      */

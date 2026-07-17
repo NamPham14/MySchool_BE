@@ -42,8 +42,9 @@ public class ScheduleController {
      * Lấy TKB của chính tôi
      */
     @GetMapping("/my-schedule")
-    public ResponseEntity<APIResponse<List<TimetableResponse>>> getMySchedule() {
-        Long sId = getCurrentUserId();
+    public ResponseEntity<APIResponse<List<TimetableResponse>>> getMySchedule(
+            @RequestParam(required = false) Long studentId) {
+        Long sId = (studentId != null) ? studentId : getCurrentUserId();
         User user = userRepository.findById(sId).orElse(null);
         Integer classId = (user != null && user.getSchoolClass() != null) ? user.getSchoolClass().getId() : null;
         

@@ -117,6 +117,7 @@ public class AuthController {
                                             user != null ? user.getEmail() : "",
                                             user != null ? user.getRollNumber() : "",
                                             user != null ? user.getCampus() : "",
+                                            user != null && user.getSchoolClass() != null ? user.getSchoolClass().getName() : "",
                                             roles);
 
         return ResponseEntity.ok(APIResponse.<JwtResponse>builder()
@@ -153,7 +154,7 @@ public class AuthController {
                         .map(Role::getName)
                         .collect(Collectors.toList());
 
-                JwtResponse data = new JwtResponse(newJwt, newRefreshToken, user.getId(), user.getPhoneNumber(), user.getFullName(), user.getAvatarUrl(), user.getEmail(), user.getRollNumber(), user.getCampus(), roles);
+                JwtResponse data = new JwtResponse(newJwt, newRefreshToken, user.getId(), user.getPhoneNumber(), user.getFullName(), user.getAvatarUrl(), user.getEmail(), user.getRollNumber(), user.getCampus(), user.getSchoolClass() != null ? user.getSchoolClass().getName() : "", roles);
                 
                 return ResponseEntity.ok(APIResponse.<JwtResponse>builder()
                         .status(HttpStatus.OK.value()).code(1000).message("Làm mới Token thành công").data(data).build());

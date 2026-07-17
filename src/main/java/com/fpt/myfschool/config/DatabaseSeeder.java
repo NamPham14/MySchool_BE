@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final GradeRepository gradeRepository;
 
     @Override
+    @Transactional
     public void run(String... args) {
         if (roleRepository.count() == 0) {
             log.info("Seeding Roles...");
@@ -46,7 +48,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .passwordHash(passwordEncoder.encode("123456"))
                     .fullName("GV. Nguyễn Văn A")
                     .status(User.UserStatus.ACTIVE)
-                    .roles(Set.of(teacherRole))
+                    .roles(new java.util.HashSet<>(java.util.List.of(teacherRole)))
                     .build();
             userRepository.save(teacher);
 
@@ -55,7 +57,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .passwordHash(passwordEncoder.encode("123456"))
                     .fullName("HS. Lê Thị B")
                     .status(User.UserStatus.ACTIVE)
-                    .roles(Set.of(studentRole))
+                    .roles(new java.util.HashSet<>(java.util.List.of(studentRole)))
                     .build();
             userRepository.save(student);
 
@@ -137,7 +139,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                                 .passwordHash(passwordEncoder.encode("123456"))
                                 .fullName("GV. " + teacherNames[i])
                                 .status(User.UserStatus.ACTIVE)
-                                .roles(Set.of(teacherRole))
+                                .roles(new java.util.HashSet<>(java.util.List.of(teacherRole)))
                                 .build();
                         userRepository.save(t);
                     }
@@ -151,6 +153,166 @@ public class DatabaseSeeder implements CommandLineRunner {
             eventCategoryRepository.save(com.fpt.myfschool.entity.EventCategory.builder().name("Thể thao").build());
             eventCategoryRepository.save(com.fpt.myfschool.entity.EventCategory.builder().name("Học thuật").build());
             eventCategoryRepository.save(com.fpt.myfschool.entity.EventCategory.builder().name("Lễ Hội").build());
+        }
+
+        log.info("Ensuring Parent and Test Students exist...");
+        // Ensure PARENT role
+        Role parentRole = roleRepository.findByName("PARENT").orElseGet(() -> {
+            Role r = new Role();
+            r.setName("PARENT");
+            return roleRepository.save(r);
+        });
+        
+        Role studentRole = roleRepository.findByName("STUDENT").orElse(null);
+        Role teacherRole = roleRepository.findByName("TEACHER").orElse(null);
+
+        // Ensure a Class SE1912 exists
+        SchoolClass defaultClass = schoolClassRepository.findAll().stream()
+            .filter(c -> "SE1912".equals(c.getName()))
+            .findFirst()
+            .orElseGet(() -> {
+                SchoolClass c = new SchoolClass();
+                c.setName("12A2");
+                c.setGrade(12);
+                c.setAcademicYear("2026-2027");
+                return schoolClassRepository.save(c);
+            });
+
+        // Create Student 1
+        User student1 = userRepository.findByPhoneNumber("0868202662").orElse(null);
+        if (student1 == null) {
+            student1 = new User();
+            student1.setPhoneNumber("0868202662");
+            student1.setFullName("Nam Pham");
+            student1.setPasswordHash(passwordEncoder.encode("123456"));
+            student1.setRollNumber("HE180988");
+            student1.setCampus("Hà Nội");
+            student1.setSchoolClass(defaultClass);
+            student1.setStatus(User.UserStatus.ACTIVE);
+            
+            Set<Role> roles1 = new java.util.HashSet<>();
+            if (studentRole != null) roles1.add(studentRole);
+            student1.setRoles(roles1);
+            student1 = userRepository.save(student1);
+        }
+
+        // Create Student 2
+        User student2 = userRepository.findByPhoneNumber("0868202661").orElse(null);
+        if (student2 == null) {
+            student2 = new User();
+            student2.setPhoneNumber("0868202661");
+            student2.setFullName("Mon");
+            student2.setPasswordHash(passwordEncoder.encode("123456"));
+            student2.setRollNumber("HE180999");
+            student2.setCampus("Hà Nội");
+            student2.setSchoolClass(defaultClass);
+            student2.setStatus(User.UserStatus.ACTIVE);
+
+            Set<Role> roles2 = new java.util.HashSet<>();
+            if (studentRole != null) roles2.add(studentRole);
+            student2.setRoles(roles2);
+            student2 = userRepository.save(student2);
+        }
+
+        // Create Parent
+        User parent = userRepository.findByPhoneNumber("0793274662").orElse(null);
+        if (parent == null) {
+            parent = new User();
+            parent.setPhoneNumber("0793274662");
+            parent.setFullName("Phụ huynh Nam & Mon");
+            parent.setPasswordHash(passwordEncoder.encode("123456"));
+            parent.setCampus("Hà Nội");
+            parent.setStatus(User.UserStatus.ACTIVE);
+
+            Set<Role> pRoles = new java.util.HashSet<>();
+            pRoles.add(parentRole);
+            parent.setRoles(pRoles);
+            
+            parent = userRepository.save(parent);
+        }
+
+        // Create or Update Teacher
+        User mainTeacher = userRepository.findByPhoneNumber("0987654321").orElse(null);
+        if (mainTeacher == null) {
+            mainTeacher = new User();
+            mainTeacher.setPhoneNumber("0987654321");
+            mainTeacher.setFullName("GV. Nguyễn Văn A");
+            mainTeacher.setPasswordHash(passwordEncoder.encode("123456"));
+            mainTeacher.setCampus("Hà Nội");
+            mainTeacher.setStatus(User.UserStatus.ACTIVE);
+
+            Set<Role> tRoles = new java.util.HashSet<>();
+            if (teacherRole != null) tRoles.add(teacherRole);
+            mainTeacher.setRoles(tRoles);
+            
+            userRepository.save(mainTeacher);
+        } else {
+            // Update password just in case it was wrong
+            mainTeacher.setPasswordHash(passwordEncoder.encode("123456"));
+            userRepository.save(mainTeacher);
+        }
+
+        // Link Parent and Students
+        if (parent.getChildren() == null || parent.getChildren().isEmpty()) {
+            Set<User> children = new java.util.HashSet<>();
+            children.add(student1);
+            children.add(student2);
+            parent.setChildren(children);
+            userRepository.save(parent);
+            log.info("========== PARENT-STUDENT LINKED ==========");
+        }
+
+        // Add Subjects if not exist
+        Subject chaoCo = subjectRepository.findAll().stream().filter(s -> s.getName().equals("Chào Cờ")).findFirst().orElseGet(() -> {
+            return subjectRepository.save(Subject.builder().code("CC").name("Chào Cờ").build());
+        });
+        Subject sinhHoat = subjectRepository.findAll().stream().filter(s -> s.getName().equals("Sinh Hoạt Lớp")).findFirst().orElseGet(() -> {
+            return subjectRepository.save(Subject.builder().code("SHL").name("Sinh Hoạt Lớp").build());
+        });
+        
+        java.util.List<Subject> allSubjects = subjectRepository.findAll().stream()
+                .filter(s -> !s.getCode().equals("CC") && !s.getCode().equals("SHL")).toList();
+
+        // Ensure timetable for SE1912 exists
+        boolean hasTimetableSE1912 = timetableRepository.findAll().stream()
+                .anyMatch(t -> t.getSchoolClass().getId().equals(defaultClass.getId()));
+
+        if (!hasTimetableSE1912 && mainTeacher != null && !allSubjects.isEmpty()) {
+            log.info("Seeding realistic Timetable for SE1912...");
+            java.util.Random random = new java.util.Random();
+            
+            for (int day = 2; day <= 7; day++) {
+                // Sáng
+                if (day == 2) {
+                    timetableRepository.save(Timetable.builder().schoolClass(defaultClass).subject(chaoCo).teacher(mainTeacher)
+                            .dayOfWeek(day).period("Tiết 1").startTime(LocalTime.of(7, 15)).endTime(LocalTime.of(8, 0)).room("Sân Trường").isExam(false).build());
+                } else {
+                    timetableRepository.save(Timetable.builder().schoolClass(defaultClass).subject(allSubjects.get(random.nextInt(allSubjects.size()))).teacher(mainTeacher)
+                            .dayOfWeek(day).period("Tiết 1").startTime(LocalTime.of(7, 15)).endTime(LocalTime.of(8, 0)).room("P.202").isExam(false).build());
+                }
+
+                timetableRepository.save(Timetable.builder().schoolClass(defaultClass).subject(allSubjects.get(random.nextInt(allSubjects.size()))).teacher(mainTeacher)
+                        .dayOfWeek(day).period("Tiết 2").startTime(LocalTime.of(8, 5)).endTime(LocalTime.of(8, 50)).room("P.202").isExam(false).build());
+                timetableRepository.save(Timetable.builder().schoolClass(defaultClass).subject(allSubjects.get(random.nextInt(allSubjects.size()))).teacher(mainTeacher)
+                        .dayOfWeek(day).period("Tiết 3").startTime(LocalTime.of(9, 5)).endTime(LocalTime.of(9, 50)).room("P.202").isExam(false).build());
+                
+                if (day == 7) {
+                    timetableRepository.save(Timetable.builder().schoolClass(defaultClass).subject(sinhHoat).teacher(mainTeacher)
+                            .dayOfWeek(day).period("Tiết 4").startTime(LocalTime.of(9, 55)).endTime(LocalTime.of(10, 40)).room("P.202").isExam(false).build());
+                } else {
+                    timetableRepository.save(Timetable.builder().schoolClass(defaultClass).subject(allSubjects.get(random.nextInt(allSubjects.size()))).teacher(mainTeacher)
+                            .dayOfWeek(day).period("Tiết 4").startTime(LocalTime.of(9, 55)).endTime(LocalTime.of(10, 40)).room("P.202").isExam(false).build());
+                }
+
+                // Chiều (Trừ thứ 7 không học chiều)
+                if (day != 7) {
+                    timetableRepository.save(Timetable.builder().schoolClass(defaultClass).subject(allSubjects.get(random.nextInt(allSubjects.size()))).teacher(mainTeacher)
+                            .dayOfWeek(day).period("Tiết 5-6").startTime(LocalTime.of(13, 30)).endTime(LocalTime.of(15, 5)).room("P.203").isExam(false).build());
+                    timetableRepository.save(Timetable.builder().schoolClass(defaultClass).subject(allSubjects.get(random.nextInt(allSubjects.size()))).teacher(mainTeacher)
+                            .dayOfWeek(day).period("Tiết 7-8").startTime(LocalTime.of(15, 20)).endTime(LocalTime.of(16, 55)).room("P.203").isExam(false).build());
+                }
+            }
+            log.info("========== SE1912 TIMETABLE SEEDED SUCCESSFULLY ==========");
         }
     }
 }

@@ -43,6 +43,6 @@ public class Notification {
     private LocalDateTime createdAt;
 
     public enum NotificationType {
-        GRADE, ASSIGNMENT, LEAVE, SYSTEM
+        GRADE, ASSIGNMENT, LEAVE, SYSTEM, ANNOUNCEMENT
     }
 }

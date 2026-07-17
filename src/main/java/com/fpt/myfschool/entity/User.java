@@ -57,7 +57,17 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @Builder.Default
     private Set<Role> roles = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "parent_student",
+        joinColumns = @JoinColumn(name = "parent_id"),
+        inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
+    @Builder.Default
+    private Set<User> children = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

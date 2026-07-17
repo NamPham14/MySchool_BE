@@ -39,7 +39,7 @@ public class GradeController {
     public ResponseEntity<APIResponse<GradeDashboardResponse>> getDashboard(
             @RequestParam(required = false) Long studentId, @RequestParam(required = false) Integer semesterId) {
         
-        Long sId = getCurrentUserId();
+        Long sId = (studentId != null) ? studentId : getCurrentUserId();
         Integer semId = (semesterId != null) ? semesterId : 1;
 
         GradeDashboardResponse data = gradeService.getStudentGradeDashboard(sId, semId);

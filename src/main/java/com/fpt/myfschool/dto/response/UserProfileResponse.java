@@ -13,4 +13,5 @@ public class UserProfileResponse {
     private String campus;
     private String status;
     private LocalDateTime createdAt;
+    private String className;
 }
