@@ -13,8 +13,12 @@ import com.fpt.myfschool.repository.SubjectRepository;
 import com.fpt.myfschool.repository.TimetableRepository;
 import com.fpt.myfschool.repository.UserRepository;
 import com.fpt.myfschool.service.ScheduleService;
+import com.fpt.myfschool.util.TimetableExcelHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,5 +105,42 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public void deleteSchedule(Long id) {
         timetableRepository.deleteById(id);
+    }
+
+    @Override
+    public java.io.ByteArrayInputStream exportTemplate() {
+        List<SchoolClass> classes = classRepository.findAll();
+        List<Subject> subjects = subjectRepository.findAll();
+        List<User> teachers = userRepository.findByRolesName("TEACHER");
+        return TimetableExcelHelper.createTemplate(classes, subjects, teachers);
+    }
+
+    @Override
+    @Transactional
+    public List<TimetableResponse> importExcel(MultipartFile file, boolean overwrite) {
+        try {
+            List<SchoolClass> classes = classRepository.findAll();
+            List<Subject> subjects = subjectRepository.findAll();
+            List<User> teachers = userRepository.findByRolesName("TEACHER");
+            
+            List<TimetableRequest> requests = TimetableExcelHelper.parseExcel(file.getInputStream(), classes, subjects, teachers);
+            
+            if (overwrite) {
+                // Delete existing timetables for classes that are present in the import file
+                List<Integer> classIds = requests.stream().map(TimetableRequest::getClassId).distinct().collect(Collectors.toList());
+                for (Integer classId : classIds) {
+                    List<Timetable> existing = timetableRepository.findBySchoolClassIdOrderByDayOfWeekAscStartTimeAsc(classId);
+                    timetableRepository.deleteAll(existing);
+                }
+            }
+            
+            List<TimetableResponse> responses = new ArrayList<>();
+            for (TimetableRequest req : requests) {
+                responses.add(createSchedule(req));
+            }
+            return responses;
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to read Excel file", e);
+        }
     }
 }

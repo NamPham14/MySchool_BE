@@ -68,6 +68,10 @@ public class GradeServiceImpl implements GradeService {
                     
             if (grade != null) {
                 response.setId(grade.getId());
+                response.setRegularScore1(grade.getRegularScore1());
+                response.setRegularScore2(grade.getRegularScore2());
+                response.setRegularScore3(grade.getRegularScore3());
+                response.setRegularScore4(grade.getRegularScore4());
                 response.setMidtermScore(grade.getMidtermScore());
                 response.setFinalScore(grade.getFinalScore());
                 response.setAverageScore(grade.getAverageScore());
@@ -109,11 +113,22 @@ public class GradeServiceImpl implements GradeService {
             grade.setSemester(semester);
         }
 
+        grade.setRegularScore1(request.getRegularScore1());
+        grade.setRegularScore2(request.getRegularScore2());
+        grade.setRegularScore3(request.getRegularScore3());
+        grade.setRegularScore4(request.getRegularScore4());
         grade.setMidtermScore(request.getMidtermScore());
         grade.setFinalScore(request.getFinalScore());
         
+        int txCount = 0;
+        double txTotal = 0;
+        if (grade.getRegularScore1() != null) { txTotal += grade.getRegularScore1(); txCount++; }
+        if (grade.getRegularScore2() != null) { txTotal += grade.getRegularScore2(); txCount++; }
+        if (grade.getRegularScore3() != null) { txTotal += grade.getRegularScore3(); txCount++; }
+        if (grade.getRegularScore4() != null) { txTotal += grade.getRegularScore4(); txCount++; }
+
         if (grade.getMidtermScore() != null && grade.getFinalScore() != null) {
-            double avg = (grade.getMidtermScore() * 0.4) + (grade.getFinalScore() * 0.6);
+            double avg = (txTotal + (grade.getMidtermScore() * 2) + (grade.getFinalScore() * 3)) / (txCount + 5);
             grade.setAverageScore((double) Math.round(avg * 10) / 10.0);
         }
 
@@ -185,6 +200,10 @@ public class GradeServiceImpl implements GradeService {
             Grade grade = gradeRepository.findByStudentIdAndSubjectIdAndSemesterId(student.getId(), subjectId, semesterId).orElse(null);
             if (grade != null) {
                 response.setGradeId(grade.getId());
+                response.setRegularScore1(grade.getRegularScore1());
+                response.setRegularScore2(grade.getRegularScore2());
+                response.setRegularScore3(grade.getRegularScore3());
+                response.setRegularScore4(grade.getRegularScore4());
                 response.setMidtermScore(grade.getMidtermScore());
                 response.setFinalScore(grade.getFinalScore());
                 response.setAverageScore(grade.getAverageScore());

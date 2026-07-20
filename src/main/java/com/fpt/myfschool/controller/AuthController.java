@@ -261,4 +261,52 @@ public class AuthController {
                 .message("Đặt lại mật khẩu thành công!")
                 .build());
     }
+
+    /**
+     * [DÀNH CHO NGƯỜI DÙNG CHƯA ĐĂNG NHẬP]
+     * API Fake Đăng nhập bằng Google cho Admin/Teacher
+     */
+    @PostMapping("/google-login")
+    public ResponseEntity<APIResponse<JwtResponse>> googleLogin(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().body(APIResponse.<JwtResponse>builder()
+                    .status(HttpStatus.BAD_REQUEST.value()).code(400).message("Thiếu email").build());
+        }
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(APIResponse.<JwtResponse>builder()
+                    .status(HttpStatus.UNAUTHORIZED.value()).code(401).message("Email chưa được đăng ký trong hệ thống").build());
+        }
+
+        // Bypass authentication check and generate tokens directly for fake Google Login
+        Authentication authentication = new UsernamePasswordAuthenticationToken(UserDetailsImpl.build(user), null, UserDetailsImpl.build(user).getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+        String refreshToken = jwtUtils.generateRefreshToken(user.getPhoneNumber()); // using phone as standard username in this system
+
+        List<String> roles = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toList());
+
+        JwtResponse data = new JwtResponse(jwt, 
+                                            refreshToken,
+                                            user.getId(), 
+                                            user.getPhoneNumber(), // this returns phoneNumber
+                                            user.getFullName(),
+                                            user.getAvatarUrl(),
+                                            user.getEmail(),
+                                            user.getRollNumber(),
+                                            user.getCampus(),
+                                            user.getSchoolClass() != null ? user.getSchoolClass().getName() : "",
+                                            roles);
+
+        return ResponseEntity.ok(APIResponse.<JwtResponse>builder()
+                .status(HttpStatus.OK.value())
+                .code(1000)
+                .message("Đăng nhập bằng Google thành công")
+                .data(data)
+                .build());
+    }
 }

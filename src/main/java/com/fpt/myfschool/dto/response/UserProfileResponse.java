@@ -14,4 +14,5 @@ public class UserProfileResponse {
     private String status;
     private LocalDateTime createdAt;
     private String className;
+    private java.util.List<String> roles;
 }

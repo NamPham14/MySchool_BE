@@ -42,8 +42,22 @@ public class DatabaseSeeder implements CommandLineRunner {
             studentRole.setName("STUDENT");
             roleRepository.save(studentRole);
 
+            Role adminRole = new Role();
+            adminRole.setName("ADMIN");
+            roleRepository.save(adminRole);
+
             log.info("Seeding Default Users...");
+            User admin = User.builder()
+                    .email("nampham2662@gmail.com")
+                    .phoneNumber("0987654320")
+                    .passwordHash(passwordEncoder.encode("123456"))
+                    .fullName("Admin Nam Pham")
+                    .status(User.UserStatus.ACTIVE)
+                    .roles(new java.util.HashSet<>(java.util.List.of(adminRole)))
+                    .build();
+            userRepository.save(admin);
             User teacher = User.builder()
+                    .email("hoangtrongnamtb@gmail.com")
                     .phoneNumber("0987654321")
                     .passwordHash(passwordEncoder.encode("123456"))
                     .fullName("GV. Nguyễn Văn A")
@@ -166,9 +180,9 @@ public class DatabaseSeeder implements CommandLineRunner {
         Role studentRole = roleRepository.findByName("STUDENT").orElse(null);
         Role teacherRole = roleRepository.findByName("TEACHER").orElse(null);
 
-        // Ensure a Class SE1912 exists
+        // Ensure a Class 12A2 exists
         SchoolClass defaultClass = schoolClassRepository.findAll().stream()
-            .filter(c -> "SE1912".equals(c.getName()))
+            .filter(c -> "12A2".equals(c.getName()))
             .findFirst()
             .orElseGet(() -> {
                 SchoolClass c = new SchoolClass();
@@ -235,6 +249,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         User mainTeacher = userRepository.findByPhoneNumber("0987654321").orElse(null);
         if (mainTeacher == null) {
             mainTeacher = new User();
+            mainTeacher.setEmail("hoangtrongnamtb@gmail.com");
             mainTeacher.setPhoneNumber("0987654321");
             mainTeacher.setFullName("GV. Nguyễn Văn A");
             mainTeacher.setPasswordHash(passwordEncoder.encode("123456"));
@@ -248,8 +263,36 @@ public class DatabaseSeeder implements CommandLineRunner {
             userRepository.save(mainTeacher);
         } else {
             // Update password just in case it was wrong
+            mainTeacher.setEmail("hoangtrongnamtb@gmail.com");
             mainTeacher.setPasswordHash(passwordEncoder.encode("123456"));
             userRepository.save(mainTeacher);
+        }
+
+        // Create or Update Admin
+        User adminUser = userRepository.findByEmail("nampham2662@gmail.com").orElse(null);
+        if (adminUser == null) {
+            adminUser = new User();
+            adminUser.setEmail("nampham2662@gmail.com");
+            adminUser.setPhoneNumber("0987654320");
+            adminUser.setFullName("Admin Nam Pham");
+            adminUser.setPasswordHash(passwordEncoder.encode("123456"));
+            adminUser.setCampus("Hà Nội");
+            adminUser.setStatus(User.UserStatus.ACTIVE);
+
+            Role adminRole = roleRepository.findByName("ADMIN").orElseGet(() -> {
+                Role r = new Role();
+                r.setName("ADMIN");
+                return roleRepository.save(r);
+            });
+            Set<Role> aRoles = new java.util.HashSet<>();
+            aRoles.add(adminRole);
+            adminUser.setRoles(aRoles);
+            
+            userRepository.save(adminUser);
+        } else {
+            // Ensure email is set
+            adminUser.setEmail("nampham2662@gmail.com");
+            userRepository.save(adminUser);
         }
 
         // Link Parent and Students

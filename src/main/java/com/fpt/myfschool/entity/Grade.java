@@ -26,6 +26,18 @@ public class Grade {
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
 
+    @Column(name = "regular_score_1", columnDefinition = "DECIMAL(4,2)")
+    private Double regularScore1;
+
+    @Column(name = "regular_score_2", columnDefinition = "DECIMAL(4,2)")
+    private Double regularScore2;
+
+    @Column(name = "regular_score_3", columnDefinition = "DECIMAL(4,2)")
+    private Double regularScore3;
+
+    @Column(name = "regular_score_4", columnDefinition = "DECIMAL(4,2)")
+    private Double regularScore4;
+
     @Column(name = "midterm_score", columnDefinition = "DECIMAL(4,2)")
     private Double midtermScore;
 

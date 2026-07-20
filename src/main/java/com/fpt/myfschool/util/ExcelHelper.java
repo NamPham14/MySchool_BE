@@ -16,7 +16,7 @@ import java.util.List;
 public class ExcelHelper {
 
     public static String TYPE =  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    static String[] HEADERS = {"Student ID", "Roll Number", "Full Name", "Midterm Score", "Final Score"};
+    static String[] HEADERS = {"Student ID", "Roll Number", "Full Name", "Regular Score 1", "Regular Score 2", "Regular Score 3", "Regular Score 4", "Midterm Score", "Final Score"};
     static String SHEET = "Grades";
 
     // kiem tra dinh dang file
@@ -51,13 +51,12 @@ public class ExcelHelper {
                 row.createCell(1).setCellValue(student.getRollNumber() != null ? student.getRollNumber() : "");
                 row.createCell(2).setCellValue(student.getStudentName() != null ? student.getStudentName() : "");
                 
-                if (student.getMidtermScore() != null) {
-                    row.createCell(3).setCellValue(student.getMidtermScore());
-                }
-                
-                if (student.getFinalScore() != null) {
-                    row.createCell(4).setCellValue(student.getFinalScore());
-                }
+                if (student.getRegularScore1() != null) row.createCell(3).setCellValue(student.getRegularScore1());
+                if (student.getRegularScore2() != null) row.createCell(4).setCellValue(student.getRegularScore2());
+                if (student.getRegularScore3() != null) row.createCell(5).setCellValue(student.getRegularScore3());
+                if (student.getRegularScore4() != null) row.createCell(6).setCellValue(student.getRegularScore4());
+                if (student.getMidtermScore() != null) row.createCell(7).setCellValue(student.getMidtermScore());
+                if (student.getFinalScore() != null) row.createCell(8).setCellValue(student.getFinalScore());
             }
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
@@ -96,19 +95,14 @@ public class ExcelHelper {
                     request.setStudentId((long) currentRow.getCell(0).getNumericCellValue());
                 }
 
-                  // Lấy Midterm Score từ cột 3
-                Cell midtermCell = currentRow.getCell(3);
-                if(midtermCell != null && midtermCell.getCellType() == CellType.NUMERIC){
-                    request.setMidtermScore(midtermCell.getNumericCellValue());
-                }
+                if(currentRow.getCell(3) != null && currentRow.getCell(3).getCellType() == CellType.NUMERIC) request.setRegularScore1(currentRow.getCell(3).getNumericCellValue());
+                if(currentRow.getCell(4) != null && currentRow.getCell(4).getCellType() == CellType.NUMERIC) request.setRegularScore2(currentRow.getCell(4).getNumericCellValue());
+                if(currentRow.getCell(5) != null && currentRow.getCell(5).getCellType() == CellType.NUMERIC) request.setRegularScore3(currentRow.getCell(5).getNumericCellValue());
+                if(currentRow.getCell(6) != null && currentRow.getCell(6).getCellType() == CellType.NUMERIC) request.setRegularScore4(currentRow.getCell(6).getNumericCellValue());
+                if(currentRow.getCell(7) != null && currentRow.getCell(7).getCellType() == CellType.NUMERIC) request.setMidtermScore(currentRow.getCell(7).getNumericCellValue());
+                if(currentRow.getCell(8) != null && currentRow.getCell(8).getCellType() == CellType.NUMERIC) request.setFinalScore(currentRow.getCell(8).getNumericCellValue());
 
-                Cell finalCell = currentRow.getCell(4);
-                if(finalCell != null && finalCell.getCellType() == CellType.NUMERIC){
-                    request.setFinalScore(finalCell.getNumericCellValue());
-                }
-
-                // Nếu có bất kỳ điểm nào được nhập, ta mới đưa vào list
-                if(request.getStudentId() != null && (request.getMidtermScore() != null || request.getFinalScore() != null)){
+                if(request.getStudentId() != null) {
                     gradeRequests.add(request);
                 }
             }

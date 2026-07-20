@@ -15,6 +15,10 @@ public class StudentGradeResponse {
     
     // Grade info
     private Long gradeId;
+    private Double regularScore1;
+    private Double regularScore2;
+    private Double regularScore3;
+    private Double regularScore4;
     private Double midtermScore;
     private Double finalScore;
     private Double averageScore;

@@ -10,4 +10,6 @@ public interface ScheduleService {
     TimetableResponse createSchedule(TimetableRequest request);
     TimetableResponse updateSchedule(Long id, TimetableRequest request);
     void deleteSchedule(Long id);
+    java.io.ByteArrayInputStream exportTemplate();
+    List<TimetableResponse> importExcel(org.springframework.web.multipart.MultipartFile file, boolean overwrite);
 }

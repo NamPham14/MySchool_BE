@@ -7,9 +7,15 @@ import com.fpt.myfschool.service.ScheduleService;
 import com.fpt.myfschool.entity.User;
 import com.fpt.myfschool.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import java.util.Arrays;
 import java.util.List;
 import java.time.LocalTime;
@@ -99,5 +105,39 @@ public class ScheduleController {
         scheduleService.deleteSchedule(id);
         return ResponseEntity.ok(APIResponse.<String>builder()
                 .status(200).code(1000).message("Xóa lịch thành công").data("OK").build());
+    }
+
+    /**
+     * [DÀNH CHO ADMIN]
+     * Tải file Excel mẫu để nhập thời khóa biểu
+     */
+    @GetMapping("/export/template")
+    public ResponseEntity<Resource> exportTemplate() {
+        java.io.ByteArrayInputStream in = scheduleService.exportTemplate();
+        InputStreamResource file = new InputStreamResource(in);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "Timetable_Template.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+                .body(file);
+    }
+
+    /**
+     * [DÀNH CHO ADMIN]
+     * Nhập thời khóa biểu từ file Excel
+     */
+    @PostMapping("/import")
+    public ResponseEntity<APIResponse<List<TimetableResponse>>> importExcel(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "overwrite", defaultValue = "false") boolean overwrite) {
+        
+        if (!com.fpt.myfschool.util.TimetableExcelHelper.hasExcelFormat(file)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                APIResponse.<List<TimetableResponse>>builder().status(400).code(4000).message("Định dạng file không hợp lệ. Vui lòng tải lên file Excel (.xlsx)").build()
+            );
+        }
+
+        List<TimetableResponse> data = scheduleService.importExcel(file, overwrite);
+        return ResponseEntity.ok(APIResponse.<List<TimetableResponse>>builder()
+                .status(200).code(1000).message("Nhập thời khóa biểu thành công (" + data.size() + " tiết học)").data(data).build());
     }
 }
