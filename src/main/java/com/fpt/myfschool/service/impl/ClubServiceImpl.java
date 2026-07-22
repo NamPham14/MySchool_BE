@@ -13,6 +13,7 @@ import com.fpt.myfschool.repository.ClubMemberRepository;
 import com.fpt.myfschool.repository.ClubRepository;
 import com.fpt.myfschool.repository.UserRepository;
 import com.fpt.myfschool.service.ClubService;
+import com.fpt.myfschool.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class ClubServiceImpl implements ClubService {
     private final ClubMemberRepository clubMemberRepository;
     private final UserRepository userRepository;
     private final ClubMapper clubMapper;
+    private final EmailService emailService;
 
     @Override
     public List<ClubResponse> getAllClubs(Long currentUserId) {
@@ -127,6 +129,13 @@ public class ClubServiceImpl implements ClubService {
         
         member.setStatus("APPROVED");
         clubMemberRepository.save(member);
+        
+        emailService.sendClubApprovalEmail(
+            member.getStudent().getEmail(),
+            member.getStudent().getFullName(),
+            member.getClub().getName(),
+            true
+        );
     }
 
     @Override
@@ -134,6 +143,13 @@ public class ClubServiceImpl implements ClubService {
         ClubMember member = clubMemberRepository.findById(memberId).orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
         member.setStatus("REJECTED");
         clubMemberRepository.save(member);
+        
+        emailService.sendClubApprovalEmail(
+            member.getStudent().getEmail(),
+            member.getStudent().getFullName(),
+            member.getClub().getName(),
+            false
+        );
     }
 
     @Override

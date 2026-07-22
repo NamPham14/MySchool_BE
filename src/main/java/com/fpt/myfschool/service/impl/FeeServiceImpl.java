@@ -89,4 +89,36 @@ public class FeeServiceImpl implements FeeService {
         return transRepo.findByFeeInvoiceIdOrderByTransactionDateDesc(invoiceId).stream()
                 .map(feeMapper::toTransactionDto).collect(Collectors.toList());
     }
+
+    @Override
+    public FeeInvoiceDto updateInvoice(Long invoiceId, com.fpt.myfschool.dto.request.UpdateFeeReqDto request) {
+        com.fpt.myfschool.entity.FeeInvoice invoice = invoiceRepo.findById(invoiceId)
+            .orElseThrow(() -> new com.fpt.myfschool.exception.AppException(com.fpt.myfschool.exception.ErrorCode.RESOURCE_NOT_FOUND));
+
+        if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
+            invoice.setTitle(request.getTitle());
+        }
+        if (request.getAmount() != null) {
+            invoice.setAmount(request.getAmount());
+        }
+        if (request.getDueDate() != null) {
+            invoice.setDueDate(request.getDueDate());
+        }
+
+        invoiceRepo.save(invoice);
+        return feeMapper.toInvoiceDto(invoice);
+    }
+
+    @Override
+    public void deleteInvoice(Long invoiceId) {
+        com.fpt.myfschool.entity.FeeInvoice invoice = invoiceRepo.findById(invoiceId)
+            .orElseThrow(() -> new com.fpt.myfschool.exception.AppException(com.fpt.myfschool.exception.ErrorCode.RESOURCE_NOT_FOUND));
+            
+        // Kiểm tra nếu đã thanh toán một phần thì không cho xóa
+        if (invoice.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
+            throw new RuntimeException("Không thể xóa hóa đơn đã có giao dịch thanh toán");
+        }
+        
+        invoiceRepo.delete(invoice);
+    }
 }

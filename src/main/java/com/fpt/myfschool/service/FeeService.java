@@ -9,4 +9,7 @@ public interface FeeService {
     List<FeeTransactionDto> getInvoiceTransactions(Long invoiceId);
     List<FeeInvoiceDto> getAllInvoices(Integer semesterId, Integer classId);
     void generateInvoicesForClass(GenerateFeeReqDto request);
+    
+    FeeInvoiceDto updateInvoice(Long invoiceId, com.fpt.myfschool.dto.request.UpdateFeeReqDto request);
+    void deleteInvoice(Long invoiceId);
 }

@@ -79,4 +79,28 @@ public class FeeController {
         return ResponseEntity.ok(APIResponse.<List<FeeTransactionDto>>builder()
                 .status(200).code(1000).message("Thành công").data(data).build());
     }
+
+    /**
+     * [DÀNH CHO GIÁO VIÊN/ADMIN]
+     * API cập nhật hóa đơn
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<APIResponse<FeeInvoiceDto>> updateInvoice(
+            @PathVariable Long id, 
+            @RequestBody com.fpt.myfschool.dto.request.UpdateFeeReqDto req) {
+        return ResponseEntity.ok(APIResponse.<FeeInvoiceDto>builder()
+                .status(200).code(1000).message("Cập nhật thành công")
+                .data(feeService.updateInvoice(id, req)).build());
+    }
+
+    /**
+     * [DÀNH CHO GIÁO VIÊN/ADMIN]
+     * API xóa hóa đơn
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<APIResponse<Void>> deleteInvoice(@PathVariable Long id) {
+        feeService.deleteInvoice(id);
+        return ResponseEntity.ok(APIResponse.<Void>builder()
+                .status(200).code(1000).message("Xóa thành công").build());
+    }
 }
